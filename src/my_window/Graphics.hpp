@@ -1,12 +1,12 @@
 #pragma once
 #include <variant>
 #include <SFML/Graphics.hpp>
-#include "TypeDefinitions.hpp"
+#include "dsa/TypeDefinitions.hpp"
 #include "ecs/ECS.hpp"
 
 namespace window {
 
-    struct MyShape final : ecs::AComponent {
+    struct MyShape {
     private:
         using ShapeVarient = std::variant<
             sf::CircleShape,
@@ -24,13 +24,6 @@ namespace window {
         }
         void commit_to_renderer();
         const td::Id get_id() const;
-    };
-
-    struct MyText final : ecs::AComponent {
-    public:
-        sf::Text data;
-        explicit inline MyText(const sf::String& string=sf::String(), const sf::Font& font=sf::Font(), unsigned int characterSize = 30)
-            : data(string, font, characterSize) {}
     };
 }
 

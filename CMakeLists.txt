@@ -25,16 +25,20 @@ add_executable(game
     src/dsa/SparseSet.cpp
     src/dsa/IdGenerator.cpp
     src/ecs/ECS.cpp
-    src/ecs/AComponent.cpp
     src/ecs/SystemDescriptor.cpp
     src/ecs/ComponentManager.cpp
-    src/systems/tests.cpp
-    src/systems/graphics.cpp
-    src/systems/physics.cpp
     src/dsa/algo.cpp
     src/ecs/SystemManager.cpp
     src/dsa/Graph.cpp
     src/ecs/MessageHandler.cpp
+    src/input/MovementController.cpp
+    src/systems.cpp
+    src/adapters.cpp
+    src/physics/RigidBody.cpp
+    src/dsa/Vector2.cpp
+    src/dsa/AVector.cpp
+    src/ecs/ResourceManager.cpp
+    src/ecs/Scheduler.cpp
 )
 target_include_directories(game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(game PRIVATE cxx_std_20)

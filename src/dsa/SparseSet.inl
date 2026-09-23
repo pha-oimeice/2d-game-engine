@@ -41,7 +41,7 @@ namespace dsa {
     }
 
     template <typename T>
-    void SparseSet<T>::set(td::Id id, T data) noexcept {
+    void SparseSet<T>::set(td::Id id, T data) {
         if (id < 0) {
             return;
         }
@@ -55,12 +55,14 @@ namespace dsa {
             // next dense index
             this->_sparse[id] = this->_dense.size();
 
-            this->_dense.push_back(std::move(DenseData<T>(id, data)));
+            this->_dense.emplace_back(id, std::move(data));
             // set completed, early return
             return;
         }
         // 3. set value
-        this->_dense[_sparse[id]].data = data;
+        else {
+            this->_dense[_sparse[id]].data = std::move(data);
+        }
     }
 
     template <typename T>

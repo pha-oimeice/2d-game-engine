@@ -31,8 +31,6 @@ namespace dsa {
 
         inline SparseSet() : _sparse(std::vector<int>(8, -1)) {}
 
-        virtual ~SparseSet() = default;
-
         // if not found: return nullptr
         DenseData<T> get(td::Id id) const noexcept;
 
@@ -44,7 +42,7 @@ namespace dsa {
 
         const std::vector<DenseData<T>>& get_dense_storage() const noexcept;
 
-        void set(td::Id id, T data) noexcept;
+        void set(td::Id id, T data);
 
         void remove(td::Id id) noexcept;
 

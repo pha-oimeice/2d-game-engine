@@ -1,106 +1,132 @@
-
+#include <iostream>
 
 namespace ecs {
 
-    template <typename T_Component>
-    requires (std::derived_from<T_Component, AComponent>)
-    void ComponentManager::add_component() {
-        const auto type_id = dsa::get_type_id<T_Component>();
-        if (this->_component_registry.contains(type_id)) {
-            // create new sparse set
-
-            this->_component_registry.insert(type_id);
-        }
-    }
-
-    template <typename... T_Components>
+    template <RawComponent... T_Components>
     inline void ComponentManager::add_components() {
-        (this->add_component<T_Components>(), ...);
+        (this->_add_component<T_Components>(), ...);
     }
 
-    template <typename T_Component>
-    requires (std::derived_from<T_Component, AComponent>)
+    template <QueryComponent T_Component>
     T_Component& ComponentManager::get_component(EntityId e) {
-        auto& sparse_set = this->get_component_storage<T_Component>()._storage;
 
-        auto* data = sparse_set.get_ref(e);
-        
-        if (data == nullptr) {
-            throw "Trying to get component that does not exists.";
+        using T_RawComponent = std::remove_cvref_t<T_Component>;
+
+        if constexpr (std::is_const_v<std::remove_reference_t<T_Component>>) {
+            // find sparse set
+            const auto& sparse_set = this->get_component_storage<T_RawComponent>();
+
+            // try to find component for entity e.
+            const auto* dense_data = sparse_set.get_ref(e);
+            
+            if (dense_data == nullptr) {
+                throw "Trying to get component that does not exists.";
+            }
+            return dense_data->data;
         }
-        return data->data;
+        else {
+            // find sparse set
+            auto& sparse_set = this->get_component_storage<T_RawComponent>();
+
+            // try to find component for entity e.
+            auto* dense_data = sparse_set.get_ref(e);
+            
+            if (dense_data == nullptr) {
+                throw "Trying to get component that does not exists.";
+            }
+            return dense_data->data;
+        }
+        
     }
 
-    template <typename T_Component>
-    requires (std::derived_from<T_Component, AComponent>)
-    ComponentStorage<T_Component>& ComponentManager::get_component_storage() {
-        return *static_cast<ComponentStorage<T_Component>*>(
+    template <RawComponent T_Component>
+    dsa::SparseSet<T_Component>& ComponentManager::get_component_storage() {      
+
+        return (*static_cast<ComponentStorage<T_Component>*>(
             // unordered map
             this->_storages[
                 dsa::get_type_id<T_Component>()
-            ].get() // unique_ptr for casting
-        );
+            ].get()
+            // unique_ptr for casting
+        ))._storage; // directly return the sparse set
     }
 
-    template <typename... T_Components>
+    template <RawComponent... T_Components>
     void ComponentManager::insert(EntityId e, T_Components... components) {
-
-        // WIP
-
+        // Initialize every components of insertion
         this->add_components<T_Components...>();
-        (
-            /*  1. validate if components is initialized
-                2. expand types into individual insertion
-            */
-            [this, e](auto&& component) {
-                using T_Component = std::remove_cvref_t<decltype(component)>;
-                // this->get_component_storage<T_Component>().set(e, component);
-            }(
-                std::forward<T_Components>(components)
-            ),
-            ...
-        );
+        // Fold expansion into multiple _insert_one functions
+        (this->_insert_one<T_Components>(e, components), ...);
     }
 
-    template <typename... T_Components>
+    template <RawComponent... T_Components>
     void ComponentManager::remove(EntityId e) {
         
     }
 
-    template <typename T_Component>
-    requires (std::derived_from<T_Component, AComponent>)
-    std::unique_ptr<std::vector<EntityId>> ComponentManager::find_entities_for_component() {
-        auto result = std::make_unique<std::vector<EntityId>>();
-        auto& storage = this->get_component_storage<T_Component>();
-        for (auto i=0; i<sizeof(storage); i++) {
-            
+    template <RawComponent T_Component>
+    std::vector<EntityId> ComponentManager::find_entities_for_component() {
+        // Create result vector
+        auto result = std::vector<EntityId>();
+        // get referecence of specific component
+        auto& sparse_set = this->get_component_storage<T_Component>();
+        for (const auto& i : sparse_set.get_dense_storage()) {
+            result.push_back(i.sparse_index);
+            // insert entity id for every component.
         }
         return result;
     }
 
-    template <typename... T_Components>
-    std::unique_ptr<std::vector<EntityId>> ComponentManager::find_archetypes() {
-        auto result = std::make_unique<std::vector<EntityId>>();
-        std::unordered_set<EntityId> temp_set;
-        std::array<std::unique_ptr<std::vector<EntityId>>, sizeof...(T_Components)> temp{
+    template <RawComponent... T_Components>
+    std::vector<EntityId> ComponentManager::find_archetypes() {
+        auto result = std::vector<EntityId>();
+        constexpr int TYPE_INTERSECTION_SET_HEIGHT = sizeof...(T_Components);
+        std::unordered_map<EntityId, int> temp_map;
+
+        this->add_components<T_Components...>();
+
+        std::array<std::vector<EntityId>, sizeof...(T_Components)> temp{
             this->find_entities_for_component<T_Components>()...
         };
 
+        // iterate over multiple entity sets
         for (auto& entities : temp) {
-            for (EntityId e : *entities.get()) {
-                if (!temp_set.contains(e)) {
-                    continue;
-                }
-                temp_set.emplace(e);
+            // iterate over multiple entity elements per set
+            for (EntityId e : entities) {
+                // find intersections among all entity sets.
+                temp_map[e] += 1;
+            }
+        }
+
+        for (const auto& pair : temp_map) {
+            // if intersection exists among all sets
+            if (pair.second == TYPE_INTERSECTION_SET_HEIGHT) {
+                // emplace entity id
+                result.emplace_back(pair.first);
             }
         }
 
         return result;
-
-        for (EntityId e : temp_set) {
-            (*result.get()).emplace_back(e);
-        }
-
-        return result;
     }
+}
+
+namespace ecs {
+
+    template <RawComponent T_Component>
+    void ComponentManager::_add_component() {
+        const auto type_id = dsa::get_type_id<T_Component>();
+        if (!this->_storages.contains(type_id)) {
+            // create new sparse set
+            this->_storages.emplace(
+                type_id,
+                std::make_unique<ComponentStorage<T_Component>>()
+            );
+        }
+    }
+
+    template <RawComponent T_Component>
+    void ComponentManager::_insert_one(EntityId e, T_Component component) {
+        this->get_component_storage<T_Component>().set(e, std::move(component));
+    }
+
 }

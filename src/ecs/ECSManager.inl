@@ -1,27 +1,35 @@
 #include <unordered_set>
 #include <array>
+#include <iostream>
 
 namespace ecs {
 
-    template <typename... T_Components>
+    template <QueryComponent... T_Components>
     std::vector<std::tuple<T_Components& ...>> ECSManager::read() {
-        auto result = std::vector<std::tuple<T_Components& ...>>();
+        auto result = std::vector<
+            // tuple made of data with const/ref
+            std::tuple<T_Components& ...>>();
 
-        auto entities = *this->_component_manager.find_archetypes<T_Components...>().get();
+        // find all entities for certain composition of components
+        auto entities = this->_component_manager.find_archetypes<std::remove_cvref_t<T_Components>...>();
 
-        return result;
-        
-        for (EntityId e : entities) {
-            result.push_back(
-                std::tuple<T_Components&...>{
-                    this->_component_manager.get_component<T_Components>(e)...
-                }
+        for (auto e : entities) {
+            // tuple construction
+            result.emplace_back(
+                // cvref is retained here to fetch correct type of component
+                this->_component_manager.get_component<T_Components>(e)...
             );
         }
+
         return result;
     }
 
-    template <typename... T_Components>
+    template <QueryResource T_Resource>
+    T_Resource& ECSManager::get_resource() {
+        return this->_resource_manager.get_resource<T_Resource>();
+    }
+
+    template <RawComponent... T_Components>
     EntityId ECSManager::create_entity(T_Components... components) {
         auto id = this->_entity_id_generator.next();
         if constexpr (sizeof...(T_Components) != 0) {

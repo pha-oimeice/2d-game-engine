@@ -7,6 +7,7 @@
 #include "dsa/IdGenerator.hpp"
 #include "ComponentManager.hpp"
 #include "SystemManager.hpp"
+#include "ResourceManager.hpp"
 
 namespace ecs {
 
@@ -21,6 +22,8 @@ namespace ecs {
 
         SystemManager _system_manager;
 
+        ResourceManager _resource_manager;
+
         dsa::IdGenerator _entity_id_generator;
 
     public:
@@ -29,10 +32,10 @@ namespace ecs {
 
         virtual ~ECSManager() = default;
 
-        template <typename... T_Components>
+        template <QueryComponent... T_Components>
         std::vector<std::tuple<T_Components&...> > read();
 
-        template <typename... T_Components>
+        template <RawComponent... T_Components>
         EntityId create_entity(T_Components... components);
 
         void remove_entity(EntityId e);
@@ -42,6 +45,9 @@ namespace ecs {
         void run();
 
         void stop();
+
+        template <QueryResource T_Resource>
+        T_Resource& get_resource();
 
         void add_system(
             const SystemFn system,

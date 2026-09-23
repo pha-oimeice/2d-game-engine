@@ -18,6 +18,8 @@ namespace ecs {
     class SystemManager final {
     private:
 
+        unsigned int _frame = 0;
+
         const unsigned int _tick_per_second;
 
         SystemManagerEnum _status;

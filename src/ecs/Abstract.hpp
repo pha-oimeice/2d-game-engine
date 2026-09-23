@@ -2,4 +2,6 @@
 
 namespace ecs {
     class AComponent {};
+
+    class AResource { };
 }

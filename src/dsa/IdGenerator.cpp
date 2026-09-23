@@ -3,7 +3,7 @@
 namespace dsa {
 
     const td::Id __global_id_generator() {
-        static td::Id id = 0u;
+        static td::Id id = 0;
         return id++;
     }
 
@@ -15,6 +15,7 @@ namespace dsa {
         _id_gc.pop();
         return id;
     }
+    
     void IdGenerator::recycle(td::Id id) noexcept{
         if (id >= this->_next_id) {
             return;

@@ -1,32 +1,23 @@
 #pragma once
-#include "TypeDefinitions.hpp"
-#include "dsa/Vector2.hpp"
-#include "ecs/ECS.hpp"
-#include <vector>
+#include "RigidBody.hpp"
+#include "dsa/SparseSet.hpp"
+#include <cmath>
 
 namespace physics {
-    enum RigidBodyEnum {
-        Static = 0,
-        Kinematic = 1,
-        Dynamic = 2,
-    };
-    struct RigidBody final : ecs::AComponent {
-    public:
-        explicit inline RigidBody(td::Id id=0, RigidBodyEnum data=RigidBodyEnum::Static) : id(id), data(data) {}
-        td::Id id;
-        RigidBodyEnum data;
+
+    class PhysicsWorld {
+    private:
+        int _tick;
+        dsa::SparseSet<RigidBodyKinematic> storage;
     };
 
-    struct Collider final : ecs::AComponent {
-    public:
-        explicit inline Collider(float radius=1.0f) : radius(radius) {}
-        float radius;
+    // x, y is the center
+    // w, h is half of its width and height
+    struct AABB {
+        float x;
+        float y;
+        float w;
+        float h;
     };
-
-    struct Velocity final : ecs::AComponent {
-    public:
-        explicit inline Velocity(dsa::Vector2f data=dsa::Vector2f(.0f, .0f)) : data(data) {}
-        dsa::Vector2f data;
-    };
-
+    
 }

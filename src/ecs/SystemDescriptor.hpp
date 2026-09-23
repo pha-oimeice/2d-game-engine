@@ -7,19 +7,20 @@ namespace ecs {
     private:
         
     public:
-        const unsigned int PRIORITY;
+        const int PRIORITY;
         const char* NAME;
-        const unsigned int TICK_PER_EXEC;
+        // unit: tick
+        const int COOLDOWN;
         
         explicit inline SystemDescriptor(
-            const unsigned int priority=0u, 
+            const int priority=0, 
             const char* name="", 
-            const unsigned int tick_per_exec=1u
+            const int cooldown=1
         ) : PRIORITY(priority), 
             NAME(name),
-            TICK_PER_EXEC(tick_per_exec)
+            COOLDOWN(cooldown)
         {
-            if (tick_per_exec < 1) {
+            if (cooldown < 1) {
                 throw "tick per execution cannot be less than 1";
             }
         }
