@@ -41,7 +41,6 @@ namespace ecs {
 
     template <RawComponent T_Component>
     dsa::SparseSet<T_Component>& ComponentManager::get_component_storage() {      
-
         return (*static_cast<ComponentStorage<T_Component>*>(
             // unordered map
             this->_storages[
@@ -65,14 +64,15 @@ namespace ecs {
     }
 
     template <RawComponent T_Component>
-    std::vector<EntityId> ComponentManager::find_entities_for_component() {
+    const std::vector<EntityId> ComponentManager::find_entities_for_component() {
         // Create result vector
         auto result = std::vector<EntityId>();
         // get referecence of specific component
         auto& sparse_set = this->get_component_storage<T_Component>();
+        
         for (const auto& i : sparse_set.get_dense_storage()) {
-            result.push_back(i.sparse_index);
             // insert entity id for every component.
+            result.emplace_back(i.sparse_index);
         }
         return result;
     }
@@ -80,7 +80,7 @@ namespace ecs {
     template <RawComponent... T_Components>
     std::vector<EntityId> ComponentManager::find_archetypes() {
         auto result = std::vector<EntityId>();
-        constexpr int TYPE_INTERSECTION_SET_HEIGHT = sizeof...(T_Components);
+        constexpr int TYPE_INTERSECTION_CARDINALITY = sizeof...(T_Components);
         std::unordered_map<EntityId, int> temp_map;
 
         this->add_components<T_Components...>();
@@ -90,7 +90,7 @@ namespace ecs {
         };
 
         // iterate over multiple entity sets
-        for (auto& entities : temp) {
+        for (const auto& entities : temp) {
             // iterate over multiple entity elements per set
             for (EntityId e : entities) {
                 // find intersections among all entity sets.
@@ -100,7 +100,7 @@ namespace ecs {
 
         for (const auto& pair : temp_map) {
             // if intersection exists among all sets
-            if (pair.second == TYPE_INTERSECTION_SET_HEIGHT) {
+            if (pair.second == TYPE_INTERSECTION_CARDINALITY) {
                 // emplace entity id
                 result.emplace_back(pair.first);
             }
@@ -114,8 +114,8 @@ namespace ecs {
 
     template <RawComponent T_Component>
     void ComponentManager::_add_component() {
-        const auto type_id = dsa::get_type_id<T_Component>();
-        if (!this->_storages.contains(type_id)) {
+        static const auto type_id = dsa::get_type_id<T_Component>();
+        if (this->_storages.find(type_id) == this->_storages.end()) {
             // create new sparse set
             this->_storages.emplace(
                 type_id,

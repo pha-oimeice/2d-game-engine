@@ -22,7 +22,7 @@ namespace ecs
 
     void ECSManager::add_system(
         const SystemFn system,
-        const SystemDescriptor system_desc
+        const SystemDescriptorLegacy system_desc
     ) {
         this->_system_manager.add_system(std::move(system), std::move(system_desc));
     }

@@ -1,4 +1,5 @@
 #pragma once
+#include "macros.h"
 #include "ECSDefinition.hpp"
 #include "dsa/IdGenerator.hpp"
 #include "dsa/SparseSet.hpp"
@@ -50,7 +51,7 @@ namespace ecs {
         void remove(EntityId e);
 
         template <RawComponent T_Component>
-        std::vector<EntityId> find_entities_for_component();
+        const std::vector<EntityId> find_entities_for_component();
 
         template <RawComponent... T_Components>
         std::vector<EntityId> find_archetypes();

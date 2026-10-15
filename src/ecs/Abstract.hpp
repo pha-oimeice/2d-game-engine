@@ -1,7 +1,8 @@
 #pragma once
 
 namespace ecs {
-    class AComponent {};
-
-    class AResource { };
+    struct AComponent {};
+    struct AResource {};
+    struct ASystem {};
+    struct ASystemParam {};
 }

@@ -7,9 +7,25 @@ namespace dsa {
     const td::Id __global_id_generator();
 
     template <typename T>
-    inline const td::Id get_type_id() {
-        static const td::Id id = __global_id_generator();
+    constexpr inline char TYPE_TOKEN = 0;
+
+    template <auto P_Fn>
+    constexpr inline char FUNCTION_TOKEN = 0;
+
+    template <typename T>
+    const inline td::Id get_type_id() {
+        const static td::Id id = __global_id_generator();
         return id;
+    }
+
+    template <typename T>
+    constexpr inline void* get_type_id_1() {
+        return &TYPE_TOKEN<T>;
+    }
+
+    template <auto P_Fn>
+    constexpr inline void* get_fn_id() {
+        return &FUNCTION_TOKEN<P_Fn>;
     }
 
     class IdGenerator {

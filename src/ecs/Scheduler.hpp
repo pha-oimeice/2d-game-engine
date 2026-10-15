@@ -1,16 +1,12 @@
 #pragma once
 #include "ECSDefinition.hpp"
+#include "Query.hpp"
+#include <concepts>
 
 namespace ecs {
 
-    class Scheduler {
+    
 
-
-    public:
-        
-        template <SystemFn P_FN, int Priority>
-        consteval void add_system();
-    };
 }
 
 /*

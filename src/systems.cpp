@@ -1,7 +1,4 @@
 #include "systems.hpp"
-#include "components.hpp"
-#include "ecs/ECS.hpp"
-#include "physics/collision.hpp"
 #include "my_window/Graphics.hpp"
 #include "my_window/Window.hpp"
 #include "adapters.hpp"
@@ -88,7 +85,7 @@ namespace sys {
             if (polygon._id == -1) {
                 polygon._id = adapaters::upload_polygon_to_renderer(polygon.radius, polygon.n);
             }
-            unsigned int rgba = rand() << 16 + rand();
+            unsigned int rgba = (rand() << 16) + rand();
             rgba |= 0x00000000;
 
             polygon.rgba = rgba;

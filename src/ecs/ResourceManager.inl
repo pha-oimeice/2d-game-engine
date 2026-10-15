@@ -5,7 +5,7 @@ namespace ecs {
     template <RawResource T_Resource>
     void ResourceManager::_init_resource() {
         const auto type_id = dsa::get_type_id<T_Resource>();
-        if (!this->_storages.contains(type_id)) {
+        if (this->_storages.find(type_id) == this->_storages.end()) {
             // create new resource
             this->_storages.emplace(
                 type_id,

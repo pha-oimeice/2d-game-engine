@@ -6,7 +6,7 @@
 namespace ecs {
     void SystemManager::add_system(
         const SystemFn system,
-        const SystemDescriptor system_desc
+        const SystemDescriptorLegacy system_desc
     ) {
         if (this->_status != Idle) {
             return;

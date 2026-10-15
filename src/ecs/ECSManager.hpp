@@ -51,7 +51,7 @@ namespace ecs {
 
         void add_system(
             const SystemFn system,
-            const SystemDescriptor system_desc = SystemDescriptor()
+            const SystemDescriptorLegacy system_desc = SystemDescriptorLegacy()
         );
 
     };

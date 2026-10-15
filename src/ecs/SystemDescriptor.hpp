@@ -1,28 +1,33 @@
 #pragma once
 #include "ECSDefinition.hpp"
+#include "cttmp/function_traits.hpp"
+#include <stdint.h>
+#include <array>
 
 namespace ecs {
 
-    class SystemDescriptor {
-    private:
-        
-    public:
-        const int PRIORITY;
-        const char* NAME;
-        // unit: tick
-        const int COOLDOWN;
-        
-        explicit inline SystemDescriptor(
-            const int priority=0, 
-            const char* name="", 
-            const int cooldown=1
-        ) : PRIORITY(priority), 
-            NAME(name),
-            COOLDOWN(cooldown)
-        {
-            if (cooldown < 1) {
-                throw "tick per execution cannot be less than 1";
-            }
-        }
+    template <typename... T_Args>
+    struct SystemDescriptor {
+        using Definition = cttmp::FunctionTraits<void(*)(T_Args...)>;
+        using Arguments = Definition::Arguments;
+
+        // static constexpr SystemFn1<T_Args...> system;
+        std::uint32_t priority;
+        std::uint32_t cooldown;
     };
+
+    
+
+
+    struct SystemDescriptorLegacy {
+
+    };
+
+    
+
+    enum class RelationshipEnum {
+        Mutex,
+        Order,
+    };
+
 }

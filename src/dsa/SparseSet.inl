@@ -16,15 +16,9 @@ namespace dsa {
 
     template <typename T>
     DenseData<T>* SparseSet<T>::get_ref(td::Id id) noexcept {
-        // does id fall within memory ?
-        if (id < 0 || id >= this->_sparse.size()) {
-            return nullptr;
-        }
-        // is id valid ?
-        if (this->_sparse[id] < 0) {
-            return nullptr;
-        }
-        return &this->_dense[_sparse[id]];
+        return const_cast<DenseData<T>*>(
+            std::as_const(*this).get_ref(id)
+        );
     }
 
     template <typename T>
@@ -41,14 +35,13 @@ namespace dsa {
     }
 
     template <typename T>
-    void SparseSet<T>::set(td::Id id, T data) {
+    void SparseSet<T>::set(td::Id id, T&& data) {
         if (id < 0) {
             return;
         }
         // 1. expand vector to avoid invalid memory access
-        if (id >= this->_sparse.size()) {
-            auto new_size = std::max(static_cast<size_t>(id+1), _sparse.size() << 1);
-            this->_sparse.resize(new_size, -1);
+        while (id >= this->_sparse.size()) {
+            this->_sparse.resize(_sparse.size() << 1, -1);
         }
         // 2. if does not exist: insert
         if (this->_sparse[id] < 0) {
@@ -95,12 +88,22 @@ namespace dsa {
     }
 
     template <typename T>
-    std::vector<td::Id> SparseSet<T>::get_all_entities() const noexcept {
-        auto result = std::vector<td::Id>(this->_dense.size(), 0);
+    const std::vector<td::Id> SparseSet<T>::get_all_entities() const {
+        auto result = std::vector<td::Id>();
+        result.reserve(this->_dense.size());
+
         for (const auto& i : this->_dense) {
             result.emplace_back(i.sparse_index);
         }
-        return result;
+
+        return std::move(result);
+    }
+
+    template <typename T>
+    std::vector<DenseData<T>>& SparseSet<T>::get_dense_storage() noexcept {
+        return const_cast<std::vector<DenseData<T>>&>(
+            std::as_const(*this).get_dense_storage()
+        );
     }
 
     template <typename T>

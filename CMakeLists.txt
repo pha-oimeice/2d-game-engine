@@ -3,6 +3,8 @@ project(2DGameEngine LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
 FetchContent_Declare(SFML
@@ -18,7 +20,6 @@ add_executable(game
     src/my_window/Graphics.cpp
     src/my_window/Window.cpp
     src/my_window/InputHandler.cpp
-    src/physics/collision.cpp
     src/Engine.cpp
     src/ecs/ECSDefinition.cpp
     src/ecs/ECSManager.cpp
@@ -27,21 +28,21 @@ add_executable(game
     src/ecs/ECS.cpp
     src/ecs/SystemDescriptor.cpp
     src/ecs/ComponentManager.cpp
-    src/dsa/algo.cpp
     src/ecs/SystemManager.cpp
     src/dsa/Graph.cpp
     src/ecs/MessageHandler.cpp
     src/input/MovementController.cpp
     src/systems.cpp
     src/adapters.cpp
-    src/physics/RigidBody.cpp
     src/dsa/Vector2.cpp
-    src/dsa/AVector.cpp
     src/ecs/ResourceManager.cpp
     src/ecs/Scheduler.cpp
+    src/cttmp/cttmp.cpp
+    src/physics/apis.hpp
+    src/physics/PhysicWorld.cpp
 )
 target_include_directories(game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
-target_compile_features(game PRIVATE cxx_std_20)
+target_compile_features(game PRIVATE cxx_std_23)
 target_link_libraries(game PRIVATE
     sfml-graphics
     sfml-audio

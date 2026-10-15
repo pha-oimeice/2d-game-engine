@@ -6,9 +6,11 @@ namespace ecs {
 
     template <QueryComponent... T_Components>
     std::vector<std::tuple<T_Components& ...>> ECSManager::read() {
-        auto result = std::vector<
+        static auto result = std::vector<
             // tuple made of data with const/ref
-            std::tuple<T_Components& ...>>();
+            std::tuple<T_Components& ...>
+        >();
+        result.clear();
 
         // find all entities for certain composition of components
         auto entities = this->_component_manager.find_archetypes<std::remove_cvref_t<T_Components>...>();

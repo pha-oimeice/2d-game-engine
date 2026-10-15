@@ -5,7 +5,6 @@ namespace engine {
     class Engine {
     public:
         Engine();
-        virtual ~Engine() = default;
     };
     inline Engine& get_engine() {
         static Engine ENGINE;
